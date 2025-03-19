@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     if (argc == 0) {
         main_loop(4242);
     } else if (std::strcmp(argv[1], "--port") == 0) {  
-         if (!valid_port(argv[2])) {
+        if (!valid_port(argv[2])) {
             std::cout << "参数错误，请检查输入。\n"
                       << "    错误：端口 [" << argv[2] << "] 不是合法端口！"
                       << std::endl;
