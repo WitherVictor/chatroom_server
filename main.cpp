@@ -1,4 +1,5 @@
 //  C++ 标准库
+#include <cstring>
 #include <iostream>
 
 //  spdlog
@@ -23,18 +24,32 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         constexpr port default_port = 4242;
         main_loop(default_port);
-    } else if (std::strcmp(argv[1], "--port") == 0) {
+    } else if (argc == 2) {
+        //  若提供两个参数，则未提供端口号
+        //  向用户提示用法
+        show_usage();
+        return -1;
+    } else if (argc == 3) {
         //  若提供参数但未提供端口号
+        if (std::strcmp(argv[1], "--port") != 0) {
+            std::cout << "参数错误，请检查输入。" << std::endl;
+            show_usage();
+        }
+
+        //  如果端口号的格式是错误的
         if (!valid_port(argv[2])) {
             //  发出错误并提示正确用法
-            std::cout << "参数错误，请检查输入。\n"
-                      << "    错误：端口 [" << argv[2] << "] 不是合法端口！"
+            std::cout << "错误：端口 [" << argv[2] << "] 不是合法端口！"
                       << std::endl;
             show_usage();
             return -1;
-        } else {
-            //  正确则使用提供的端口
-            main_loop(make_port(argv[2]));
         }
+
+        //  正确则使用提供的端口
+        main_loop(make_port(argv[2]));
+    } else {
+        std::cout << "参数错误，请检查输入。" << std::endl;
+        show_usage();
+        return -1;
     }
 }
