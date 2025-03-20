@@ -2,10 +2,10 @@
 
 #include <cstddef>
 #include <functional>
+#include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/bind/bind.hpp>
-#include <memory>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
