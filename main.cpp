@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     spdlog::set_level(spdlog::level::trace);
 
     //  如果未提供任何参数，则使用默认参数
-    if (argc == 0) {
+    if (argc == 1) {
         constexpr port default_port = 4242;
         main_loop(default_port);
     } else if (std::strcmp(argv[1], "--port") == 0) {
