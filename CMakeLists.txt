@@ -32,12 +32,18 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+    GIT_SHALLOW TRUE
+)
+FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
     GIT_TAG v1.15.1
     GIT_SHALLOW TRUE
 )
-FetchContent_MakeAvailable(sqlite3 spdlog)
+FetchContent_MakeAvailable(sqlite3 spdlog nlohmann_json)
 
 # 将 sqlite3 编译成库
 add_library(sqlite3 STATIC ${sqlite3_SOURCE_DIR}/sqlite3.c)
@@ -58,6 +64,7 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE
         include
         ${BOOST_INCLUDE_PATH}
+        ${nlohmann_json_SOURCE_DIR}/single_include
         ${sqlite_orm_SOURCE_DIR}/include
 )
 
@@ -66,7 +73,15 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         spdlog
         sqlite3
+        nlohmann_json
 )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    # 如果平台是 Windows，则 boost.asio 需要的 impl 库 ws2_32
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE ws2_32
+    )
+endif ()
 
 # 因为 Boost 需要本地环境存在，因此单独链接目录下所有库
 target_link_directories(${PROJECT_NAME}
