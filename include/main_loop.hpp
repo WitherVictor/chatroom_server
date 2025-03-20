@@ -26,6 +26,9 @@ inline void main_loop(port server_port) {
         tcp::socket socket{io_context};
         acceptor.accept(socket);
 
+        auto remote_endpoint = socket.remote_endpoint();
+        spdlog::info("接收到新连接，IP 地址：{}:{}", remote_endpoint.address().to_string(), remote_endpoint.port());
+
         //  连接建立后，将 socket 移动到 login 模块处理登录
         auto& login_handler = login::instance();
         login_handler.acquire_socket(std::move(socket));
