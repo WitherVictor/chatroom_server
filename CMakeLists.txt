@@ -79,7 +79,9 @@ target_link_libraries(${PROJECT_NAME}
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 如果平台是 Windows，则 boost.asio 需要的 impl 库 ws2_32
     target_link_libraries(${PROJECT_NAME}
-        PRIVATE ws2_32
+        PRIVATE
+            ws2_32
+            mswsock
     )
 endif ()
 
