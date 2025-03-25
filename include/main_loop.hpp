@@ -5,9 +5,25 @@
 #include <spdlog/spdlog.h>
 
 //  项目内头文件
+#include "boost/system/detail/error_code.hpp"
 #include "login.hpp"
 
 using port = unsigned short;
+
+inline void start_accept(tcp::acceptor& acceptor) {
+    auto socket_ptr = std::make_shared<tcp::socket>(acceptor.get_executor());
+
+    acceptor.async_accept(*socket_ptr, [socket_ptr, &acceptor](boost::system::error_code ec) {
+        if (!ec) {
+            login::instance().acquire_socket_ptr(socket_ptr);
+        } else {
+            spdlog::error("acceptor 建立链接失败！错误码：{}，错误信息：{}", ec.value(), ec.message());
+        }
+
+        //  形成递归调用
+        start_accept(acceptor);
+    });
+}
 
 inline void main_loop(port server_port) {
     using namespace boost::asio::ip;
@@ -21,16 +37,7 @@ inline void main_loop(port server_port) {
     tcp::endpoint endpoint{tcp::v4(), server_port};
     tcp::acceptor acceptor{io_context, endpoint};
 
-    while (true) {
-        //  接收即将到来的 socket 连接
-        tcp::socket socket{io_context};
-        acceptor.accept(socket);
+    start_accept(acceptor);
 
-        auto remote_endpoint = socket.remote_endpoint();
-        spdlog::info("接收到新连接，IP 地址：{}:{}", remote_endpoint.address().to_string(), remote_endpoint.port());
-
-        //  连接建立后，将 socket 移动到 login 模块处理登录
-        auto& login_handler = login::instance();
-        login_handler.acquire_socket(std::move(socket));
-    }
+    io_context.run();
 }

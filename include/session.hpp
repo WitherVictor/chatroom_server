@@ -22,6 +22,8 @@ public:
     session& operator=(const session&) = delete;
 
     void read() {
+        auto remote_endpoint = m_socket.remote_endpoint();
+        spdlog::info("等待 {}:{} 传输数据。", remote_endpoint.address().to_string(), remote_endpoint.port());
         asio::async_read_until(m_socket,
                                m_buffer,
                                packet_separator,
@@ -49,6 +51,8 @@ public:
     }
 
     void data_received(const boost::system::error_code& ec, std::size_t bytes_transferred) {
+        spdlog::info("接收到客户端消息，数据长度：{}", bytes_transferred);
+
         //  处理错误
         if (ec) {
             spdlog::error("消息传输出现错误！错误码：{}，错误消息：{}", ec.value(), ec.message());
@@ -61,6 +65,8 @@ public:
         std::getline(stream, raw_json_data, packet_separator);
         m_buffer.consume(bytes_transferred);
 
+        spdlog::info("已从缓冲区内读入数据，开始处理。");
+        
         //  调用回调函数处理数据
         m_callback(shared_from_this(), raw_json_data);
 

@@ -22,6 +22,7 @@ public:
     }
 
     void process_login_request(std::shared_ptr<session> connection, const std::string& raw_json_data) {
+        spdlog::info("开始解析登录请求数据。");
         try {
             auto request_json = json::parse(raw_json_data);
 
@@ -30,15 +31,20 @@ public:
                 auto username = request_json.at("username").get<std::string>();
                 auto password = request_json.at("password").get<std::string>();
 
+                json reply_json{};
+                reply_json["request_type"] = "login";
+
                 if (username == "123" && password == "456") {
                     spdlog::info("用户验证通过！");
-                    json reply_json{};
-                    reply_json["request_type"] = "login";
                     reply_json["result"] = "passed";
-
-                    auto raw_data = reply_json.dump() + session::packet_separator;
-                    connection->write(raw_data);
+                } else {
+                    spdlog::info("用户验证失败！");
+                    reply_json["result"] = "denied";
                 }
+
+                auto raw_data = reply_json.dump() + session::packet_separator;
+                spdlog::info("即将发送数据：{}", raw_data);
+                connection->write(raw_data);
             } else {
                 spdlog::error("登录模块接收的请求类型不匹配，实际请求类型：{}", request_type);
             }
@@ -47,11 +53,12 @@ public:
         }
     }
 
-    void acquire_socket(tcp::socket socket) {
+    void acquire_socket_ptr(std::shared_ptr<tcp::socket> socket_ptr) {
+        spdlog::info("将 socket 连接移交至 login 模块。");
         auto data_received_callback = [this](std::shared_ptr<session> connection, const std::string& data) {
             this->process_login_request(connection, data);
         };
-        auto new_session = std::make_shared<session>(std::move(socket), data_received_callback);
+        auto new_session = std::make_shared<session>(std::move(*socket_ptr), data_received_callback);
         m_socket_list.emplace_back(new_session);
         m_socket_list.back()->read();
     }
