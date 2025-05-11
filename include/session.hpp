@@ -63,7 +63,7 @@ public:
         std::istream stream(&m_buffer);
         std::string raw_json_data{};
         std::getline(stream, raw_json_data, packet_separator);
-        m_buffer.consume(bytes_transferred);
+        m_buffer.consume(raw_json_data.size());
 
         spdlog::info("已从缓冲区内读入数据，开始处理。");
         
