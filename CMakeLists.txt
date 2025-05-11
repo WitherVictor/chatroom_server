@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # 设置 Boost 头文件与库路径
-set(BOOST_INCLUDE_PATH "D:/libraries/boost_1_87_0")
+set(BOOST_INCLUDE_PATH "D:/Development/boost_1_88_0")
 set(BOOST_LIBRARY_PATH ${BOOST_INCLUDE_PATH}/stage/lib)
 
 # 设置 URL 下载为新标准
