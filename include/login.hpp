@@ -5,8 +5,10 @@
 #include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <sqlite_orm/sqlite_orm.h>
 
 #include "session.hpp"
+#include "database.hpp"
 
 using json = nlohmann::json;
 using namespace boost::asio::ip;
@@ -22,6 +24,8 @@ public:
     }
 
     void process_login_request(std::shared_ptr<session> connection, const std::string& raw_json_data) {
+        using namespace sqlite_orm;
+
         spdlog::info("开始解析登录请求数据。");
         try {
             auto request_json = json::parse(raw_json_data);
@@ -34,12 +38,20 @@ public:
                 json reply_json{};
                 reply_json["request_type"] = "login";
 
-                if (username == "123" && password == "456") {
-                    spdlog::info("用户验证通过！");
-                    reply_json["result"] = "passed";
+                auto storage = database::storage();
+
+                auto account_ptr = storage.get_pointer<account>(where(c(&account::name) == username));
+                if (account_ptr) {
+                    if (account_ptr->password == password) {
+                        reply_json["result"] = "passed";
+                    } else {
+                        reply_json["result"] = "denied";
+                        reply_json["reason"] = "wrong password";
+                    }
                 } else {
-                    spdlog::info("用户验证失败！");
+                    spdlog::error("无法在数据库中查找到用户名!");
                     reply_json["result"] = "denied";
+                    reply_json["reason"] = "No username";
                 }
 
                 auto raw_data = reply_json.dump() + session::packet_separator;
