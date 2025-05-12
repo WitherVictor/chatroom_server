@@ -7,4 +7,5 @@ Checks: >
   misc-*,
   cert-*,
   readability-*,
-  clang-analyzer-*
+  clang-analyzer-*,
+  -modernize-use-trailing-return-type
