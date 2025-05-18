@@ -3,3 +3,4 @@ Checks: >
   cppcoreguidelines-*,
   misc-*,
   clang-analyzer-*,
+  readability-*

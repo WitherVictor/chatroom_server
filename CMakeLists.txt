@@ -68,6 +68,16 @@ target_include_directories(${PROJECT_NAME}
         ${sqlite_orm_SOURCE_DIR}/include
 )
 
+# chatroom_server 需要的源文件
+target_sources(${PROJECT_NAME}
+    PRIVATE
+        src/database.cpp
+        src/login.cpp
+        src/main_loop.cpp
+        src/session.cpp
+        src/utility.cpp
+)
+
 # chatroom_server 所需的库
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
@@ -83,6 +93,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
             ws2_32
             mswsock
     )
+    if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+        target_link_libraries(${PROJECT_NAME} PRIVATE stdc++exp)
+    endif ()
 endif ()
 
 # 因为 Boost 需要本地环境存在，因此单独链接目录下所有库
@@ -109,14 +122,24 @@ file(GLOB_RECURSE UNIT_TEST_SOURCES tests/*.cpp)
 # 将单元测试添加到 unit_test 目标
 add_executable(${UNIT_TEST} ${UNIT_TEST_SOURCES})
 
+# 添加单元测试需要测试的函数源码
+target_sources(${UNIT_TEST}
+    PRIVATE
+        src/utility.cpp
+)
+
 # unit_test 需要的头文件
 target_include_directories(${UNIT_TEST}
-    PRIVATE include
+    PRIVATE
+        include
+        ${nlohmann_json_SOURCE_DIR}/single_include
 )
 
 # 链接日志库 spdlog 和单元测试库 googletest
 target_link_libraries(${UNIT_TEST}
-    PRIVATE spdlog
-    PRIVATE GTest::gtest
-    PRIVATE GTest::gtest_main
+    PRIVATE
+        spdlog
+        nlohmann_json
+        GTest::gtest
+        GTest::gtest_main
 )
