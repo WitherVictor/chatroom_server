@@ -75,6 +75,7 @@ target_sources(${PROJECT_NAME}
         src/login.cpp
         src/main_loop.cpp
         src/session.cpp
+        src/signup.cpp
         src/utility.cpp
 )
 

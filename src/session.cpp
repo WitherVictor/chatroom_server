@@ -1,13 +1,17 @@
 #include "session.h"
 
+#include <string>
+#include <utility>
+
 //  第三方库
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <boost/asio.hpp>
+#include <boost/system/error_code.hpp>
 
 //  项目内
-#include "boost/asio/error.hpp"
-#include "boost/system/detail/error_code.hpp"
 #include "login.h"
+#include "signup.h"
 
 using namespace boost;
 using namespace boost::asio::ip;
@@ -32,6 +36,7 @@ void session::read() {
 }
 
 void session::write(std::string data) {
+    spdlog::debug("即将发送消息: {}", data);
     asio::async_write(m_socket, asio::buffer(data),
         [session_shared_ptr = shared_from_this()] (const boost::system::error_code& error_code, std::size_t bytes_sent) {
             session_shared_ptr->data_sent(error_code, bytes_sent);
@@ -90,10 +95,15 @@ std::string session::split_raw_data() {
 }
 
 void session::dispatch_request(std::string raw_data) {
+    spdlog::debug("开始分发请求: {}", raw_data);
     auto json_data = nlohmann::json::parse(raw_data);
-    const auto& request_type = json_data["request_type"];
+    const auto& request_type = json_data.at("request_type").get<std::string>();
 
     if (request_type == "login") {
         login::process_request(*this, std::move(json_data));
+    } else if (request_type == "register") {
+        signup::process_request(*this, std::move(json_data));
     }
+
+    spdlog::error("未知请求类型: {}", request_type);
 }
