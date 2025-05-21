@@ -22,7 +22,7 @@ session::session(tcp::socket socket)
 void session::read() {
     //  打印链接日志
     auto remote_endpoint = m_socket.remote_endpoint();
-    spdlog::info("等待 {}:{} 传输数据。",
+    spdlog::debug("等待 {}:{} 传输数据。",
                     remote_endpoint.address().to_string(),
                     remote_endpoint.port()
     );
@@ -52,14 +52,14 @@ void session::data_sent(const boost::system::error_code& error_code, std::size_t
         return;
     }
 
-    spdlog::info("消息已发送，传输字节数：{}", bytes_transferred);
+    spdlog::debug("消息已发送，传输字节数：{}", bytes_transferred);
 
     //  链式调用
     read();
 }
 
 void session::data_received(const boost::system::error_code& error_code, std::size_t bytes_transferred) {
-    spdlog::info("接收到客户端消息，数据长度：{}", bytes_transferred);
+    spdlog::debug("接收到客户端消息，数据长度：{}", bytes_transferred);
 
     //  通讯结束
     if (error_code == boost::asio::error::eof) {
@@ -76,7 +76,7 @@ void session::data_received(const boost::system::error_code& error_code, std::si
 
     dispatch_request(split_raw_data());
 
-    spdlog::info("已从缓冲区内读入数据，开始处理。");
+    spdlog::debug("请求处理完成, 继续监听消息.");
     
     read();
 }

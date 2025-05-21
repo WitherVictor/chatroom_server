@@ -11,7 +11,7 @@ void login::process_request(session& connection, nlohmann::json json_data) {
     using namespace sqlite_orm;
     using json = nlohmann::json;
 
-    spdlog::info("开始解析登录请求数据.");
+    spdlog::debug("开始解析登录请求数据.");
 
     auto username = json_data.at("username").get<std::string>();
     auto password = json_data.at("password").get<std::string>();
@@ -45,7 +45,7 @@ void login::process_request(session& connection, nlohmann::json json_data) {
     auto raw_data = reply_json.dump();
     raw_data.push_back(session::packet_separator);
 
-    spdlog::info("即将发送数据：{}", raw_data);
+    spdlog::debug("即将发送数据: {}", raw_data);
 
     connection.write(raw_data);
 }

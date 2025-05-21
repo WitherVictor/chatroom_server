@@ -22,7 +22,7 @@ void main_loop::accept(tcp::acceptor& acceptor) {
 void main_loop::start(port server_port) {
     using namespace boost::asio::ip;
 
-    spdlog::info("服务器监听目标端口：{}。", server_port);
+    spdlog::debug("服务器监听目标端口：{}。", server_port);
 
     //  io 上下文
     boost::asio::io_context io_context{};
