@@ -103,7 +103,7 @@ void session::dispatch_request(std::string raw_data) {
         login::process_request(*this, std::move(json_data));
     } else if (request_type == "register") {
         signup::process_request(*this, std::move(json_data));
+    } else {
+        spdlog::error("未知请求类型: {}", request_type);
     }
-
-    spdlog::error("未知请求类型: {}", request_type);
 }
