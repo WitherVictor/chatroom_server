@@ -22,14 +22,14 @@ void login::process_request(session& connection, nlohmann::json json_data) {
     json reply_json{};
     reply_json["request_type"] = "login";
     
-    auto account_ptr = storage.get_pointer<account>(
-        where(
-            c(&account::name) == username
-        )
+    auto result_account_vec = storage.get_all<account>(
+        where(c(&account::name) == username),
+        limit(1)
     );
 
-    if (account_ptr) {
-        if (account_ptr->password == password) {
+    if (!result_account_vec.empty()) {
+        const auto& result_account = result_account_vec.front();
+        if (result_account.password == password) {
             reply_json["result"] = "passed";
         } else {
             reply_json["result"] = "denied";
