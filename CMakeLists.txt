@@ -71,6 +71,7 @@ target_include_directories(${PROJECT_NAME}
 # chatroom_server 需要的源文件
 target_sources(${PROJECT_NAME}
     PRIVATE
+        src/chatroom.cpp
         src/database.cpp
         src/login.cpp
         src/main_loop.cpp

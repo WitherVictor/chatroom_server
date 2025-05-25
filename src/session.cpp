@@ -10,6 +10,7 @@
 #include <boost/system/error_code.hpp>
 
 //  项目内
+#include "chatroom.h"
 #include "login.h"
 #include "signup.h"
 
@@ -36,7 +37,6 @@ void session::read() {
 }
 
 void session::write(std::string data) {
-    spdlog::debug("即将发送消息: {}", data);
     asio::async_write(m_socket, asio::buffer(data),
         [session_shared_ptr = shared_from_this()] (const boost::system::error_code& error_code, std::size_t bytes_sent) {
             session_shared_ptr->data_sent(error_code, bytes_sent);
@@ -64,7 +64,7 @@ void session::data_received(const boost::system::error_code& error_code, std::si
     //  通讯结束
     if (error_code == boost::asio::error::eof) {
         auto remote_endpoint = m_socket.remote_endpoint();
-        spdlog::error("客户端 {}:{} 已结束与服务器的链接，通信终止。", remote_endpoint.address().to_string(), remote_endpoint.port());
+        spdlog::debug("客户端 {}:{} 已结束与服务器的链接，通信终止。", remote_endpoint.address().to_string(), remote_endpoint.port());
         return;
     }
 
@@ -76,9 +76,7 @@ void session::data_received(const boost::system::error_code& error_code, std::si
 
     dispatch_request(split_raw_data());
 
-    spdlog::debug("请求处理完成, 继续监听消息.");
-    
-    read();
+    spdlog::debug("请求处理完成.");
 }
 
 std::string session::split_raw_data() {
@@ -103,6 +101,8 @@ void session::dispatch_request(std::string raw_data) {
         login::process_request(*this, std::move(json_data));
     } else if (request_type == "register") {
         signup::process_request(*this, std::move(json_data));
+    } else if (request_type == "create_chatroom" ) {
+        chatroom::create(*this);
     } else {
         spdlog::error("未知请求类型: {}", request_type);
     }
