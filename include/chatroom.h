@@ -16,8 +16,8 @@ public:
     chatroom(const chatroom&) = delete;
     chatroom& operator=(const chatroom&) = delete;
 
-    chatroom(chatroom&&) noexcept;
-    chatroom& operator=(chatroom&&) noexcept;
+    chatroom(chatroom&&) noexcept = delete;
+    chatroom& operator=(chatroom&&) noexcept = delete;
 
     void reply_create_request(session&);
 
@@ -25,6 +25,6 @@ public:
     static std::vector<std::unique_ptr<chatroom>> rooms;
     static std::mutex m_rooms_mutex;
 private:
-    std::atomic<std::size_t> m_user_count;
     boost::uuids::uuid m_id;
+    std::vector<session*> m_conns;
 };

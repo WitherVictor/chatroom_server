@@ -17,12 +17,9 @@ std::mutex chatroom::m_rooms_mutex = {};
 chatroom::chatroom()
     : m_id(boost::uuids::random_generator{}()) {}
 
-chatroom::chatroom(chatroom&& other) noexcept
-    : m_user_count{other.m_user_count.load()}, m_id{other.m_id} {}
-
 void chatroom::create(session& connection) {
     auto new_chatroom_ptr = std::make_unique<chatroom>();
-    new_chatroom_ptr->m_user_count++;
+    new_chatroom_ptr->m_conns.push_back(&connection);
     new_chatroom_ptr->reply_create_request(connection);
 
     std::unique_lock lock{chatroom::m_rooms_mutex};
