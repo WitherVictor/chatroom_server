@@ -43,7 +43,6 @@ void login::process_request(session& connection, nlohmann::json json_data) {
 
     //  将 json 对象转为字节流
     auto raw_data = reply_json.dump();
-    raw_data.push_back(session::packet_separator);
 
     spdlog::debug("即将发送数据: {}", raw_data);
 

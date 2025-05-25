@@ -20,7 +20,7 @@ void signup::process_request(session& conn, nlohmann::json json_data) {
     reply_json["request_type"] = "register";
     reply_json["result"] = "passed";
 
-    auto raw_data = reply_json.dump() + session::packet_separator;
+    auto raw_data = reply_json.dump();
 
     spdlog::debug("请求准备完成, 内容: {}.", raw_data);
 

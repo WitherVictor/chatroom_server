@@ -37,6 +37,8 @@ void session::read() {
 }
 
 void session::write(std::string data) {
+    data.push_back(session::packet_separator);
+
     asio::async_write(m_socket, asio::buffer(data),
         [session_shared_ptr = shared_from_this()] (const boost::system::error_code& error_code, std::size_t bytes_sent) {
             session_shared_ptr->data_sent(error_code, bytes_sent);

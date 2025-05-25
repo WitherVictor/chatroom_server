@@ -38,7 +38,6 @@ void chatroom::reply_create_request(session& connection) {
     reply_json["uuid"] = boost::uuids::to_string(m_id);
 
     auto raw_data = reply_json.dump();
-    raw_data.push_back(session::packet_separator);
 
     spdlog::debug("准备回应请求, 内容: {}.", raw_data);
     
