@@ -66,7 +66,7 @@ void session::data_received(const boost::system::error_code& error_code, std::si
     //  通讯结束
     if (error_code == boost::asio::error::eof) {
         auto remote_endpoint = m_socket.remote_endpoint();
-        spdlog::debug("客户端 {}:{} 已结束与服务器的链接，通信终止。", remote_endpoint.address().to_string(), remote_endpoint.port());
+        spdlog::warn("客户端 {}:{} 已结束与服务器的链接，通信终止。", remote_endpoint.address().to_string(), remote_endpoint.port());
         return;
     }
 
@@ -105,6 +105,8 @@ void session::dispatch_request(std::string raw_data) {
         signup::process_request(*this, std::move(json_data));
     } else if (request_type == "create_chatroom" ) {
         chatroom::create(*this);
+    } else if (request_type == "message") {
+        chatroom::receive_message(*this, std::move(json_data));
     } else {
         spdlog::error("未知请求类型: {}", request_type);
     }
