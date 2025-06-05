@@ -107,6 +107,8 @@ void session::dispatch_request(std::string raw_data) {
         chatroom::create(*this);
     } else if (request_type == "message") {
         chatroom::receive_message(*this, std::move(json_data));
+    } else if (request_type == "join_chatroom") {
+        chatroom::join_chatroom(*this, std::move(json_data));
     } else {
         spdlog::error("未知请求类型: {}", request_type);
     }

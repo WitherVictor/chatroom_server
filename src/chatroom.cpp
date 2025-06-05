@@ -84,3 +84,34 @@ void chatroom::broadcast_message(nlohmann::json json_data) {
         conn_ptr->write(raw_data);
     }
 }
+
+void chatroom::join_chatroom(session& conn, nlohmann::json json_data) {
+    const auto& target_id_string = json_data.at("uuid").get<std::string>();
+    const auto target_uuid = boost::uuids::string_generator{}(target_id_string);
+
+    auto find_result = std::ranges::find_if(rooms, [&target_uuid](const auto& room_ptr) {
+        return room_ptr->m_id == target_uuid;
+    });
+
+    //  回应请求的 json
+    nlohmann::json reply_json;
+    reply_json["request_type"] = "join_chatroom";
+
+    if (find_result != rooms.end()) {
+        auto& chatroom = *(*find_result);
+
+        std::unique_lock lock{chatroom.m_conns_mutex};
+        chatroom.m_conns.push_back(&conn);
+        lock.unlock();
+
+        reply_json["result"] = "success";
+        reply_json["uuid"] = boost::uuids::to_string(chatroom.m_id);
+    } else {
+        reply_json["result"] = "failed";
+        reply_json["reason"] = "未找到指定 ID 的聊天室!";
+    }
+
+    auto raw_data = reply_json.dump();
+    spdlog::debug("回应加入聊天室请求, 回应内容: {}.", raw_data);
+    conn.write(raw_data);
+}

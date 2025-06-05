@@ -24,10 +24,12 @@ public:
 
     static void create(session&);
     static void receive_message(session&, nlohmann::json);
+    static void join_chatroom(session&, nlohmann::json);
 
     static std::vector<std::unique_ptr<chatroom>> rooms;
     static std::mutex m_rooms_mutex;
 private:
     boost::uuids::uuid m_id;
     std::vector<session*> m_conns;
+    mutable std::mutex m_conns_mutex;
 };
