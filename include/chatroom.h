@@ -21,6 +21,7 @@ public:
 
     void reply_create_request(session&);
     void broadcast_message(nlohmann::json);
+    void update_usercount();
 
     static void create(session&);
     static void receive_message(session&, nlohmann::json);

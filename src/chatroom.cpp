@@ -106,6 +106,8 @@ void chatroom::join_chatroom(session& conn, nlohmann::json json_data) {
 
         reply_json["result"] = "success";
         reply_json["uuid"] = boost::uuids::to_string(chatroom.m_id);
+
+        chatroom.update_usercount();
     } else {
         reply_json["result"] = "failed";
         reply_json["reason"] = "未找到指定 ID 的聊天室!";
@@ -114,4 +116,24 @@ void chatroom::join_chatroom(session& conn, nlohmann::json json_data) {
     auto raw_data = reply_json.dump();
     spdlog::debug("回应加入聊天室请求, 回应内容: {}.", raw_data);
     conn.write(raw_data);
+}
+
+void chatroom::update_usercount() {
+    using nlohmann::json;
+
+    spdlog::debug("准备广播用户人数更新请求.");
+
+    auto user_count = m_conns.size();
+
+    json reply_json;
+    reply_json["request_type"] = "update_usercount";
+    reply_json["user_count"] = user_count;
+
+    auto raw_data = reply_json.dump();
+
+    spdlog::debug("请求内容: {}.", raw_data);
+
+    for (const auto& session_ptr : m_conns) {
+        session_ptr->write(raw_data);
+    }
 }
